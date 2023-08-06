@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Update Student Record</title>
+		<link rel="stylesheet" type="text/css" href="./css/index.css" />
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
+	</head>
+	<body>
+		<div id="container">
+			<h2>Search Student to update using Student ID</h2>
+			<div id="form-container">
+				<form id="form">
+					<div class="form-divs">
+						<label for="student_id">Student ID: </label>
+						<input type="text" name="student_id" id="student_id" title="Unique student ID." placeholder="ST001" autofocus minlength="5" size="8" />
+					</div>
+					<div id="btn-container">
+						<div><button type="submit" id="submit1" title="Button to Submit form">Submit</button></div>
+						<div><button type="Reset" title="Button to Reset form">Reset</button></div>
+					</div>
+				</form>
+			</div>
+			<div id="response-container" class="hidden">
+				<h2>Student Details are as follows:</h2>
+				<div id="table-container">
+					<table id="table" border="1" title="All Students List">
+						<thead>
+							<tr>
+								<th style="width: 20px">Sr.No.</th>
+								<th>Student ID</th>
+								<th>First Name</th>
+								<th>Last Name</th>
+								<th>Birthdate</th>
+								<th>Grade</th>
+								<th>Mentor</th>
+							</tr>
+						</thead>
+						<tbody id="tableBody"></tbody>
+					</table>
+				</div>
+			</div>
+			<div id="form-container2" class="hidden">
+				<h2>Enter info below to update</h2>
+				<form id="form">
+					<caption>
+						Student data form
+					</caption>
+					<div class="form-divs">
+						<label for="student_id2">Student ID: </label>
+						<input type="text" name="student_id2" id="student_id2" title="Unique student ID." placeholder="ST001" autofocus minlength="5" size="8" />
+					</div>
+					<div class="form-divs">
+						<label for="first_name">First Name: </label>
+						<input type="text" id="first_name" name="first_name" placeholder="First Name" title="Enter your first name as mentioned on legal documents." minlength="1" maxlength="20" size="22" />
+					</div>
+					<div class="form-divs">
+						<label type="text" for="last_name">Last Name: </label>
+						<input id="last_name" name="last_name" placeholder="Last Name" title="Enter your last name as mentioned on legal documents." minlength="1" maxlength="20" size="22" />
+					</div>
+					<div class="form-divs">
+						<label for="student_dob">Date of Birth: </label>
+						<input type="date" name="student_dob" id="student_dob" title="Date of Birth as mentioned in legal document" />
+					</div>
+					<div class="form-divs">
+						<span>Grades: </span>
+						<div class="radioBtns-container">
+							<div>
+								<input type="radio" value="A" name="student_grade" id="grade_a" title="Grade A" />
+								<label for="grade_a">A</label>
+							</div>
+							<div>
+								<input type="radio" value="B" name="student_grade" id="grade_b" title="Grade B" />
+								<label for="grade_b">B</label>
+							</div>
+							<div>
+								<input type="radio" value="C" name="student_grade" id="grade_c" title="Grade C" />
+								<label for="grade_c">C</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-divs">
+						<label for="mentor">Mentor: </label>
+						<select name="student_mentor" id="student_mentor" title="Select mentor by name.">
+							<option value="">Select from following</option>
+							<option value="Lavanya">Lavanya</option>
+							<option value="Pooja">Pooja</option>
+							<option value="Priya">Priya</option>
+						</select>
+					</div>
+					<div id="btn-container">
+						<div><button type="submit" id="submit2" title="Button to Submit form">Submit Form</button></div>
+						<div><button type="Reset" title="Button to Reset form">Reset Form</button></div>
+					</div>
+				</form>
+			</div>
+			<div id="response-error" class="hidden"></div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var creatorSdkPromise = ZOHO.CREATOR.init();
+
+			// FIXME - uncomment following line and brackets associated with it, before packing.
+			creatorSdkPromise
+				.then(function (data) {
+					let recordOps = ZOHO.CREATOR.API;
+					let $form = $('#form-container2');
+					let $tableBody = $('#tableBody');
+					let $errorDiv = $('#response-error');
+					let $responseContainer = $('#response-container');
+					let ID, student;
+
+					$('#submit1').click(function (e) {
+						e.preventDefault();
+						console.log('Fetching Student Details...');
+
+						let student_id = $('#student_id').val();
+
+						let config = {
+							reportName: 'All_Students_List',
+							criteria: `student_id != ${null}`,
+						};
+						// console.log('Config: ');
+						// console.log(config);
+
+						let getRecords = recordOps.getAllRecords(config).then(function (jsonData) {
+							// console.log('Response: ');
+							// console.log(jsonData);
+
+							if (jsonData.code === 3000) {
+								$tableBody.empty();
+								$errorDiv.empty();
+								$responseContainer.addClass('hidden');
+								$form.addClass('hidden');
+
+								student = jsonData.data.filter(function (student) {
+									return student.student_id === student_id;
+								});
+
+								if (student.length > 0) {
+									$errorDiv.addClass('hidden');
+
+									// showResponse(jsonData.data);
+									$.each(student, function (idx, value) {
+										// console.log('value: ', value);
+
+										let $row = $('<tr></tr>'); // Create a new row
+
+										ID = value.ID;
+										// Create and append table cells for each object property
+										$row.append(`<td>${idx + 1}</td>`);
+										$row.append(`<td>${value.student_id}</td>`);
+										$row.append(`<td>${value.student_name.first_name}</td>`);
+										$row.append(`<td>${value.student_name.last_name}</td>`);
+										$row.append(`<td>${value.student_dob}</td>`);
+										$row.append(`<td>${value.student_grade}</td>`);
+										$row.append(`<td>${value.student_mentor}</td>`);
+
+										// Append the row to the table body
+										$tableBody.append($row);
+
+										$('#student_id2').val(value.student_id);
+										$('#first_name').val(value.student_name.first_name);
+										$('#last_name').val(value.student_name.last_name);
+										$('input[name=student_grade]:checked').val(value.student_grade);
+										// let dob = new Date($('#student_dob').val()).toDateString().split(' ');
+										// let student_dob = dob[2] + '-' + dob[1] + '-' + dob[3];
+										$('#student_mentor').val(value.student_mentor);
+									});
+
+									// unhide table and form to update data
+									$responseContainer.removeClass('hidden');
+									$form.removeClass('hidden');
+								} else {
+									$errorDiv.append('No records found for given Student ID, please make sure Student ID is correct');
+									$errorDiv.removeClass('hidden');
+								}
+							} else {
+								$errorDiv.append(jsonData.message || 'Error occurred while getting response from server.');
+								$errorDiv.removeClass('hidden');
+							}
+						});
+					});
+					$('#submit2').click(function (e) {
+						e.preventDefault();
+						console.log('Updating Record...');
+
+						let student_id = $('#student_id2').val();
+						let first_name = $('#first_name').val();
+						let last_name = $('#last_name').val();
+						let student_name =
+							$.isEmptyObject($('#first_name').val()) && $.isEmptyObject($('#last_name').val())
+								? ''
+								: $.isEmptyObject($('#first_name').val())
+								? { last_name: last_name }
+								: $.isEmptyObject($('#last_name').val())
+								? { first_name: first_name }
+								: { first_name: first_name, last_name: last_name };
+						let student_grade = $('input[name=student_grade]:checked').val();
+						let dob = new Date($('#student_dob').val()).toDateString().split(' ');
+						let student_dob = dob[2] + '-' + dob[1] + '-' + dob[3];
+						let student_mentor = $('#student_mentor').val();
+						let record_id = $('#record_id').val();
+
+						let formData = {
+							data: {},
+						};
+
+						if (!$.isEmptyObject($('#student_id2').val())) {
+							formData.data['student_id'] = student_id;
+						}
+						if (!$.isEmptyObject(student_name)) {
+							formData.data['student_name'] = student_name;
+						}
+						if (!$.isEmptyObject($('input[name=student_grade]:checked').val())) {
+							formData.data['student_grade'] = student_grade;
+						}
+						if (!$.isEmptyObject($('#student_dob').val())) {
+							formData.data['student_dob'] = student_dob;
+						}
+						if (!$.isEmptyObject($('#student_mentor').val())) {
+							formData.data['student_mentor'] = student_mentor;
+						}
+
+						// console.log('Record ID is: ', student[0].ID);
+						var config2 = {
+							reportName: 'All_Students_List',
+							data: formData,
+							id: ID,
+						};
+						// console.log('Config2: ');
+						// console.log(config2);
+
+						var updateRecord = recordOps.updateRecord(config2).then(function (jsonData) {
+							console.log('Response: ');
+							console.log(jsonData);
+
+							if (jsonData.code === 3000) {
+								alert('Successfully updated student data.');
+							} else {
+								alert('Error in updatting student data.');
+							}
+							$form.addClass('hidden');
+							$responseContainer.addClass('hidden');
+						});
+					});
+				})
+				.catch(function (data) {
+					console.log(data);
+				});
+		});
+	</script>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Sample Widget</title>
+		<link rel="stylesheet" type="text/css" href="./css/index.css" />
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
+	</head>
+	<body>
+		<div id="container">
+			<h2>Fetch Student Details using Student ID</h2>
+			<div id="form-container">
+				<form id="form">
+					<div class="form-divs">
+						<label for="student_id">Student ID: </label>
+						<input type="text" name="student_id" id="student_id" title="Unique student ID." placeholder="ST001" autofocus minlength="5" size="8" />
+					</div>
+					<div id="btn-container">
+						<div><button type="submit" id="submit" title="Button to Submit form">Submit</button></div>
+						<div><button type="Reset" title="Button to Reset form">Reset</button></div>
+					</div>
+				</form>
+			</div>
+			<div id="response-container" class="hidden">
+				<h2>Student Details are as follows:</h2>
+				<div id="table-container">
+					<table id="table" border="1" title="All Students List">
+						<thead>
+							<tr>
+								<th style="width: 20px">Sr.No.</th>
+								<th>Student ID</th>
+								<th>First Name</th>
+								<th>Last Name</th>
+								<th>Birthdate</th>
+								<th>Grade</th>
+								<th>Mentor</th>
+							</tr>
+						</thead>
+						<tbody id="tableBody"></tbody>
+					</table>
+				</div>
+			</div>
+			<div id="response-error" class="hidden"></div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var creatorSdkPromise = ZOHO.CREATOR.init();
+
+			// FIXME - uncomment following line and brackets associated with it, before packing.
+			creatorSdkPromise.then(function (data) {
+				var recordOps = ZOHO.CREATOR.API;
+				$('#submit')
+					.click(function (e) {
+						e.preventDefault();
+						console.log('Fetching Student Details...');
+
+						var student_id = $('#student_id').val();
+
+						var config = {
+							reportName: 'All_Students_List',
+							criteria: `student_id != ${null}`,
+						};
+						// console.log('Config: ');
+						// console.log(config);
+
+						let $tableBody = $('#tableBody');
+						var addRecord = recordOps
+							.getAllRecords(config)
+							.then(function (jsonData) {
+								// console.log('Response: ');
+								// console.log(jsonData);
+
+								if (jsonData.code === 3000) {
+									$tableBody.empty();
+									$('#response-error').empty();
+									$('#response-container').addClass('hidden');
+									let student = jsonData.data.filter(function (student) {
+										return student.student_id === student_id;
+									});
+
+									if (student.length > 0) {
+										$('#response-error').addClass('hidden');
+
+										// showResponse(jsonData.data);
+										$.each(student, function (idx, value) {
+											// console.log(value);
+											let $row = $('<tr></tr>'); // Create a new row
+
+											// Create and append table cells for each object property
+											$row.append(`<td>${idx + 1}</td>`);
+											$row.append(`<td>${value.student_id}</td>`);
+											$row.append(`<td>${value.student_name.first_name}</td>`);
+											$row.append(`<td>${value.student_name.last_name}</td>`);
+											$row.append(`<td>${value.student_dob}</td>`);
+											$row.append(`<td>${value.student_grade}</td>`);
+											$row.append(`<td>${value.student_mentor}</td>`);
+
+											// Append the row to the table body
+											$tableBody.append($row);
+
+											// unhide table
+											$('#response-container').removeClass('hidden');
+										});
+									} else {
+										$('#response-error').append('No records found for given Student ID, please make sure Student ID is correct');
+										$('#response-error').removeClass('hidden');
+									}
+								} else {
+									$('#response-error').append(jsonData.message || 'Error occurred while getting response from server.');
+									$('#response-error').removeClass('hidden');
+								}
+							})
+							.catch(function (data) {
+								console.log(data);
+							});
+					})
+					.catch(function (data) {
+						console.log(data);
+					});
+			});
+		});
+	</script>
+</html>

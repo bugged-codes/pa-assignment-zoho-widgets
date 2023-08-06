@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Sample Widget</title>
+		<link rel="stylesheet" type="text/css" href="./css/index.css" />
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
+	</head>
+	<body>
+		<div id="container">
+			<h2>Delete Student Records</h2>
+			<div id="form-container">
+				<form id="form">
+					<div class="form-divs">
+						<label for="student_id">Criteria: </label>
+						<input
+							type="text"
+							name="criteria"
+							id="criteria"
+							title="Condition to filter the record, in the format of &lt;Field Name&gt; &lt;Operator&gt; &lt;Value&gt;.The supported operators are !=, <=, >=,<, >, ==. You can combine more than one criteria using logical AND (&&) and logical OR(||)."
+							placeholder="student_id == ST001"
+							autofocus
+							size="22"
+						/>
+					</div>
+					<div id="btn-container">
+						<div><button type="submit" id="submit" title="Button to Submit form">Submit</button></div>
+						<div><button type="Reset" title="Button to Reset form">Reset</button></div>
+					</div>
+				</form>
+			</div>
+			<div id="response-error" class="hidden"></div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var creatorSdkPromise = ZOHO.CREATOR.init();
+
+			// FIXME - uncomment following line and brackets associated with it, before packing.
+			creatorSdkPromise.then(function (data) {
+				var recordOps = ZOHO.CREATOR.API;
+				$('#submit')
+					.click(function (e) {
+						e.preventDefault();
+
+						console.log('Record Deleting...');
+						var criteria = $('#criteria').val();
+
+						var config = {
+							reportName: 'All_Students_List',
+							criteria: criteria,
+						};
+						console.log('Config: ');
+						console.log(config);
+
+						$('#response-error').empty();
+						$('#response-error').addClass('hidden');
+
+						var deleteRecord = recordOps.deleteRecord(config);
+						deleteRecord
+							.then(function (jsonData) {
+								console.log('Response: ');
+								console.log(jsonData);
+
+								if (jsonData.code == 3000) {
+									alert('Successfully deleted the record.');
+								}
+							})
+							.catch(function (data) {
+								console.log(data);
+								if (data.code == 3100) {
+									$('#response-error').append('No record of specified criteria exists.');
+									$('#response-error').removeClass('hidden');
+								}
+							});
+					})
+					.catch(function (data) {
+						console.log(data);
+					});
+			});
+		});
+	</script>
+</html>

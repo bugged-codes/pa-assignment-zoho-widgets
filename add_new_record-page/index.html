@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Add New Student</title>
+		<link rel="stylesheet" type="text/css" href="./css/index.css" />
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="https://js.zohostatic.com/creator/widgets/version/1.0/widgetsdk-min.js"></script>
+	</head>
+	<body>
+		<div id="container">
+			<h2>Add a New Student to database</h2>
+			<div id="form-container">
+				<form id="form">
+					<caption>
+						Student Entry Form
+					</caption>
+					<div class="form-divs">
+						<label for="student_id">Student ID: </label>
+						<input type="text" name="student_id" id="student_id" title="Unique student ID." placeholder="ST001" autofocus minlength="5" size="8" />
+					</div>
+					<div class="form-divs">
+						<label for="first_name">First Name: </label>
+						<input type="text" id="first_name" name="first_name" placeholder="First Name" required title="Enter your first name as mentioned on legal documents." minlength="1" maxlength="20" size="22" />
+					</div>
+					<div class="form-divs">
+						<label type="text" for="last_name">Last Name: </label>
+						<input id="last_name" name="last_name" placeholder="Last Name" required title="Enter your last name as mentioned on legal documents." minlength="1" maxlength="20" size="22" />
+					</div>
+					<div class="form-divs">
+						<label for="student_dob">Date of Birth: </label>
+						<input type="date" name="student_dob" id="student_dob" title="Date of Birth as mentioned in legal document" />
+					</div>
+					<div class="form-divs">
+						<span>Grades: </span>
+						<div class="radioBtns-container">
+							<div>
+								<input type="radio" value="A" name="student_grade" id="grade_a" title="Grade A" />
+								<label for="grade_a">A</label>
+							</div>
+							<div>
+								<input type="radio" value="B" name="student_grade" id="grade_b" title="Grade B" />
+								<label for="grade_b">B</label>
+							</div>
+							<div>
+								<input type="radio" value="C" name="student_grade" id="grade_c" title="Grade C" />
+								<label for="grade_c">C</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-divs">
+						<label for="mentor">Mentor: </label>
+						<select name="student_mentor" id="student_mentor" title="Select mentor by name.">
+							<option>Select from following</option>
+							<option value="Lavanya">Lavanya</option>
+							<option value="Pooja">Pooja</option>
+							<option value="Priya">Priya</option>
+						</select>
+					</div>
+					<div id="btn-container">
+						<div><button type="submit" id="submit" title="Button to Submit form">Submit</button></div>
+						<div><button type="Reset" title="Button to Reset form">Reset</button></div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var creatorSdkPromise = ZOHO.CREATOR.init();
+			creatorSdkPromise.then(function (data) {
+				var recordOps = ZOHO.CREATOR.API;
+				$('#submit')
+					.click(function (e) {
+						e.preventDefault();
+						console.log('Record Adding...');
+
+						var student_id = $('#student_id').val();
+						var first_name = $('#first_name').val();
+						var last_name = $('#last_name').val();
+						var student_name = { first_name: first_name, last_name: last_name };
+						var student_grade = $('input[name=student_grade]:checked').val();
+						var dob = new Date($('#student_dob').val()).toDateString().split(' ');
+						var student_dob = dob[2] + '-' + dob[1] + '-' + dob[3];
+						var student_mentor = $('#student_mentor').val();
+
+						var formData = {
+							data: {
+								student_id: student_id,
+								student_name: student_name,
+								student_grade: student_grade,
+								student_dob: student_dob,
+								student_mentor: student_mentor,
+							},
+						};
+
+						var config = {
+							formName: 'Add_New_Student1',
+							data: formData,
+						};
+						// console.log('Config: ');
+						// console.log(config);
+
+						var addRecord = recordOps.addRecord(config);
+						addRecord
+							.then(function (jsonData) {
+								console.log('Response: ');
+								console.log(jsonData);
+
+								if (jsonData.code === 3000) {
+									alert('Successfully added new student.');
+								} else {
+									alert('Error in adding new student.');
+								}
+							})
+							.catch(function (data) {
+								console.log(data);
+							});
+					})
+					.catch(function (data) {
+						console.log(data);
+					});
+			});
+		});
+	</script>
+</html>
